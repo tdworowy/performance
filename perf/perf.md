@@ -3,13 +3,11 @@
 \>= 0: Disallow raw and ftrace function tracepoint access  
 \>= 1: Disallow CPU event access  
 \>= 2: Disallow kernel profiling
-
 ``` bash
 sudo sysctl -w kernel.perf_event_paranoid=-1
 ```
 
 Sample any porogram runing on CPU at 99 Hertz for 30 s
-
 ``` bash
 perf record -F 99 -a -- sleep 30 
 perf report --stdio
@@ -84,3 +82,46 @@ count block device I/O events for the entire system
 ``` bash
 perf stat -e  'block:*' -a sleep 10
 ```
+
+sample CPU stack traces (via frame pointers)
+``` bash
+perf record -F 99 -a -g -- sleep 10 
+```
+
+sample CPU stack traces for the PID, using dwarf(debuginfo)
+to unwind stacls
+``` bash
+perf record -F 99 -p PID --cell-graph dwarf sleep 10
+```
+
+sample CPU stack traces for a container by 
+its /sys/fs/cgroup/pref_event cgroup
+``` bash
+perf record -F 99 -e cpu-clock --cgroup=docker/1d5..etc..
+-a sleep 10 
+```
+
+sample CPU stack traces for entire system, using last
+branch record (LBR;Intel)
+``` bash
+perf record -F 99 -a --cell-graph ibr sleep 10
+```
+
+sample CPU stack traces, onece every 100 last-level cache misses
+``` bash
+perf record -e LLC-load-misses -c 100 -ag sleep 5
+```
+
+sample on-CPU user instructions precisely (e.g, using Intel PEBS)
+``` bash
+perf record -e cycles:up -a sleep 5
+```
+
+sample CPUs at 49 Hertz, and show top process names 
+and segments
+``` bash
+perf top -F 49 -ns comm,dso
+``` 
+
+
+
