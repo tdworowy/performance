@@ -123,5 +123,158 @@ and segments
 perf top -F 49 -ns comm,dso
 ``` 
 
+trace processes
+``` bash
+perf record -e sched:sched_process_exec -s
+```
 
+sample a subset of context switches with stack traces
+``` bash
+perf record -e context-switches -a -g sleep 1
+```
 
+trace all context switches with stact traces
+``` bash
+perf record -e sched:sched_switch -a -g sleep 1
+```
+
+trace all context switches with 5-level deep stact traces
+``` bash
+perf record -e sched:sched_switch/max-stack=5/ -a sleep 1
+```
+
+trace connect(2) calls (outbound connections) with stack traces
+``` bash
+perf record -e syscalls:sys_enter_connect -a -g
+```
+sample at most 100 block devuce reqyests per second
+``` bash
+perf record -F 100 -e block:block_rq_issue -a
+```
+
+trace all block device issues and completions
+``` bash
+perf record -e block:block_rq_issue,block:block_rq_complete -a
+```
+
+trace all block requests, of size at least 64KB
+``` bash
+perf record -e block:block_rq_issue --filter 'bytes > =65536'
+```
+
+tarce all ext4 calls, and write to a non-ext4 locations
+``` bash
+perf record -e "ext4:*" -o /tmp/perf.data -a
+```
+
+trace the http__server__request USDT event (from Node.js)
+``` bash
+perf record -e sdt_node:http__server__request -a
+```
+
+trace block device requests with live output (no perf.data)
+``` bash
+perf record -e block:block_rq__issue
+```
+
+trace block device requests and completions whth live output
+``` bash
+perf trace -e block:block_rq__issue,block_rq__complete
+```
+
+add a probe for the kernel tcp_sendmsg() function entry 
+``` bash
+perf probe --add tcp_sendmsg
+```
+
+remvoe a probe for the kernel tcp_sendmsg() function entry 
+``` bash
+perf probe --del tcp_sendmsg
+```
+
+list available variables for tcp_sendmsg() plus externals 
+(needs kernel debuginfo)
+add a probe for the kernel tcp_sendmsg() function entry 
+``` bash
+perf probe --V tcp_sendmsg --externs
+```
+
+list available line probes for tcp_sendmsg()
+``` bash
+perf probe --L tcp_sendmsg
+```
+
+list available variables for tco_sendmsg() at line 81
+(needs kernel debuginfo)
+``` bash
+perf probe --V tcp_sendmsg:81
+```
+
+add a probe for tcp_sendmsg() with entry argument registers
+``` bash
+perf probe 'tcp_sendmsg %ax %dx %cx'
+```
+
+add a probe for tcp_sendmsg() with an alias ("bytes")
+for %cx register
+``` bash
+perf probe 'tcp_sendmsg bytes=%cx'
+```
+
+trace previously created probe when bytes(alias) is greater than 100
+``` bash
+perf recod --e probe:tcp_sendmsg --filter 'bytes > 100'
+```
+
+add a tarcepoint for tcp_sendmsg() return, and capture the return value
+``` bash
+perf probe 'tcp_sendmsg%return $retval'
+```
+
+add a tracepoint for tcp_sendmsq() with size and socket state
+(needs kernel debuginfo)
+``` bash
+perf probe 'tcp_sendmsg size sk>__sk_common.sk_state'
+```
+
+add a tracepoint for do_sys_open() with filename as a string
+(needs kernel debuginfo)
+``` bash
+perf probe 'do_sys_open filename:string'
+```
+
+add a tracepoint for the user-level fopen(3) fucntion from libc
+``` bash
+perf probe -x /lib/x86_64-linux-gnu/lobc.os.6 --add fopen
+```
+
+show perf.data in an ncurses browser (TUI) if possible
+``` bash
+perf report
+```
+
+show perf.data as text report
+``` bash
+perf report -n --stdio
+```
+
+list all perf.data events
+``` bash
+perf script --header
+```
+
+list all perf.data events, with specified fields
+``` bash
+perf script --header -F comm,pid,tid,cpu,time,event,ip,sym,dso
+```
+
+generate a flame graph visualization 
+``` bash
+perf script report flamegraph
+```
+
+disassemble and annotate instructions with percentages 
+(needs kernel debuginfo)
+``` bash
+perf annotate --stdio
+```
