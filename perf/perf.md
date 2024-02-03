@@ -62,7 +62,25 @@ perf stat -e LLC-loads,LLC-loed-misses,LLC-stores,LLC-prefatches <command>
 
 count unhalted core cycles using a PMC raw specification (Intel)
 ``` bash
+perf stat -e r003c -a sleep 5
+```
+
+count front-end stalls using a verbouse PMC raw specification (Intel)  
+``` bash
 perf stat -e  cpu/event=0x0e,umask0x01,inv,cmask=0x01 -a sleep 5
 ```
 
-count front-end stalls using a verbouse PMC raw specification (Intel)
+count syscalls per second system-wide
+``` bash
+perf stat -e  raw_syscalls:sys_enter -I 1000 -a
+```
+
+count syscalls by type for the specified PID
+``` bash
+perf stat -e  'syscalls:sys_enter_*' -p PID
+```
+
+count block device I/O events for the entire system
+``` bash
+perf stat -e  'block:*' -a sleep 10
+```
